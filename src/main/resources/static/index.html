@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GustaveBike | Premium Mobility</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+<body>
+
+    <div id="auth-module" class="auth-overlay">
+        <div class="auth-box shadow-lg text-center animate__animated animate__fadeInUp">
+            <div class="mb-4">
+                <i class="fa-solid fa-bicycle fa-3x text-primary"></i>
+                <h2 class="fw-bold mt-2">GustaveBike</h2>
+            </div>
+            
+            <div id="login-container">
+                <h5 class="mb-3 fw-semibold">Welcome Back</h5>
+                <form id="loginForm">
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" id="loginId" placeholder="Email" required>
+                        <label>Email Address</label>
+                    </div>
+                    <div class="form-floating mb-2">
+                        <input type="password" class="form-control" id="loginPass" placeholder="Password" required>
+                        <label>Password</label>
+                    </div>
+                    <div class="text-end mb-4">
+                        <a href="#" class="small text-decoration-none text-muted" onclick="App.toggleReset()">Forgot password?</a>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-pill shadow-sm">Sign In</button>
+                </form>
+                <div class="mt-4 small">
+                    New here? <a href="#" class="fw-bold text-primary" onclick="App.toggleAuth()">Create an account</a>
+                </div>
+            </div>
+            
+            <div id="register-container" class="d-none">
+                <h5 class="mb-3 fw-semibold">Join the Community</h5>
+                <form id="registerForm">
+                    <input type="text" id="regName" class="form-control mb-2" placeholder="Username" required>
+                    <input type="email" id="regEmail" class="form-control mb-2" placeholder="Email (use @edu.univ-eiffel.fr for rentals)" required>
+                    <input type="password" id="regPass" class="form-control mb-3" placeholder="Password" required>
+                    <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-pill">Create Account</button>
+                </form>
+                <div class="mt-4 small">
+                    Already a member? <a href="#" class="fw-bold text-primary" onclick="App.toggleAuth()">Log in</a>
+                </div>
+            </div>
+
+            <div id="reset-container" class="d-none">
+                <h5 class="mb-3 fw-semibold">Reset Password</h5>
+                <form id="resetForm">
+                    <input type="email" id="resetEmail" class="form-control mb-3" placeholder="Enter your email" required>
+                    <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-pill">Send Code</button>
+                </form>
+                <div class="mt-4 small"><a href="#" onclick="App.toggleReset()">Back to login</a></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="app-module" class="wrapper d-none">
+        <nav class="sidebar">
+            <div class="brand"><i class="fa-solid fa-bicycle"></i> GustaveBike</div>
+            <div class="nav-content">
+                <div class="nav-label">Marketplace</div>
+                <a href="#" class="nav-item active" data-view="rent"><i class="fa-solid fa-compass"></i> Rent</a>
+                <a href="#" class="nav-item" data-view="buy"><i class="fa-solid fa-tag"></i> Buy</a>
+                <a href="#" class="nav-item" data-view="acc"><i class="fa-solid fa-helmet-safety"></i> Accessories</a>
+                
+                <div class="nav-label">Personal</div>
+                <a href="#" class="nav-item" data-view="listings"><i class="fa-solid fa-layer-group"></i> My Listings</a>
+                <a href="#" class="nav-item" data-view="my-rentals"><i class="fa-solid fa-person-biking"></i> My Rentals</a>
+                <a href="#" class="nav-item" data-view="inbox"><i class="fa-solid fa-robot"></i> Gustave AI</a>
+            </div>
+            
+			<div class="user-footer mt-auto p-4 border-top">
+			    <div class="d-flex align-items-center gap-3 mb-3">
+			        <div class="avatar shadow-sm" id="user-avatar-initial">U</div>
+			        <div class="user-info">
+			            <div class="fw-bold small" id="user-display">User</div>
+			            <small class="text-muted" id="role-display" style="font-size: 0.7rem;">Member</small>
+			        </div>
+			    </div>
+			    <button onclick="App.logout()" class="btn btn-outline-danger btn-sm w-100 rounded-pill">
+			        <i class="fas fa-sign-out-alt me-2"></i> Logout
+			    </button>
+			</div>
+        </nav>
+
+        <main class="main-content">
+            <header class="topbar px-4">
+                <h5 class="fw-bold m-0" id="page-title">Rent a Bike</h5>
+                <div class="d-flex gap-3 align-items-center">
+                    <div id="pro-btn-container"></div>
+                    <button class="btn btn-dark btn-sm rounded-pill px-3 position-relative" onclick="App.openCart()">
+                        <i class="fa-solid fa-cart-shopping me-2"></i> 
+                        <span id="cart-total-header">0€</span>
+                        <span id="badge-cart" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none">0</span>
+                    </button>
+                </div>
+            </header>
+            <div id="views-container" class="p-4 h-100 overflow-auto"></div>
+        </main>
+    </div>
+	
+	<div id="admin-module" class="admin-wrapper d-none">
+	    <nav class="admin-sidebar">
+	        <div class="admin-brand">
+	            <i class="fa-solid fa-shield-halved text-primary me-2"></i>
+	            <span>G-BIKE <small>CORE</small></span>
+	        </div>
+	        <div class="admin-nav mt-3">
+	            <a href="#" class="admin-nav-item active" onclick="App.nav('admin-dash')"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+	            <a href="#" class="admin-nav-item" onclick="App.nav('admin-users')"><i class="fa-solid fa-users-gear"></i> User Control</a>
+	            <a href="#" class="admin-nav-item" onclick="App.nav('admin-bikes')"><i class="fa-solid fa-bicycle"></i> Fleet Manager</a>
+	            <a href="#" class="admin-nav-item" onclick="App.nav('admin-offers')">
+	                <i class="fa-solid fa-hand-holding-dollar"></i> Seller Proposals 
+	                <span id="badge-proposals" class="badge bg-danger rounded-pill ms-2 d-none">0</span>
+	            </a>
+				<a href="#" class="admin-nav-item" onclick="App.nav('admin-acc')">
+				    <i class="fa-solid fa-helmet-safety"></i> Accessories
+				</a>
+	        </div>
+	        
+	        <div class="admin-footer p-3 mt-auto border-top border-secondary">
+	            <button class="btn btn-outline-danger btn-sm w-100 rounded-pill" onclick="App.logout()">
+	                <i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Exit & Logout
+	            </button>
+	        </div>
+	    </nav>
+
+	    <main class="admin-main">
+	        <header class="admin-header shadow-sm">
+	            <h4 id="admin-page-title" class="fw-bold m-0 text-white">System Overview</h4>
+	        </header>
+	        <div id="admin-content" class="p-4"></div>
+	    </main>
+	</div>
+
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="cart-offcanvas">
+        <div class="offcanvas-header border-bottom">
+            <h5 class="fw-bold m-0">My Cart</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body d-flex flex-column">
+            <div id="cart-list" class="flex-grow-1 overflow-auto"></div>
+            <div class="pt-4 border-top mt-auto">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="fw-bold">Total :</span>
+                    <span class="fs-4 fw-bold text-primary" id="cart-total-canvas">0.00€</span>
+                </div>
+                <button class="btn btn-primary w-100 py-3 fw-bold rounded-pill" onclick="App.triggerPayment('CART', 0, null)">Checkout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-detail" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header border-0 pb-0"><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body p-4">
+                    <div class="row">
+                        <div class="col-md-5">
+                            <img id="d-img" class="img-fluid rounded shadow-sm mb-3 w-100" style="height: 250px; object-fit: cover;">
+                            <h4 id="d-title" class="fw-bold m-0"></h4>
+                            <div class="text-primary fw-bold fs-5 mb-2" id="d-price"></div>
+                            <small class="text-muted">Owner: <span id="d-owner"></span></small>
+                        </div>
+                        <div class="col-md-7" id="d-actions"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-pay" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-body p-4">
+                    <h4 class="fw-bold mb-1" id="pay-desc">Payment</h4>
+                    <div class="fs-2 fw-bold text-primary mb-4" id="pay-amount">0.00€</div>
+                    <div id="payment-element" class="mb-4"></div>
+                    <div id="payment-message" class="text-danger small mb-3"></div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-light flex-fill rounded-pill fw-bold" data-bs-dismiss="modal">Cancel</button>
+                        <button class="btn btn-success flex-fill rounded-pill fw-bold" onclick="App.confirmPayment()">Pay Now</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modal-listing" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0">
+                <div class="modal-header"><h5 class="fw-bold">Publish Listing</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <form id="form-listing">
+                        <input type="text" id="l-model" class="form-control mb-2" placeholder="Bike Model" required>
+                        <select id="l-power" class="form-select mb-2">
+                            <option value="MECA">Mechanical</option>
+                            <option value="ELEC">Electric</option>
+                        </select>
+                        <input type="number" id="l-price" class="form-control mb-2" placeholder="Price per day (€)" required>
+                        <input type="file" id="l-file" class="form-control mb-3" accept="image/*" required>
+                        
+                        <div class="bg-light p-3 rounded mb-3">
+                            <h6>Contact Details</h6>
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" id="use-profile-info">
+                                <label class="form-check-label small">Use my profile info</label>
+                            </div>
+                            <input type="tel" id="l-phone" class="form-control mb-2" placeholder="Phone (e.g. 06...)" required>
+                            <div id="err-phone" class="text-danger small d-none">Invalid French Phone Number</div>
+                            <input type="text" id="l-iban" class="form-control mb-2" placeholder="IBAN (FR...)" required>
+                            <div id="err-iban" class="text-danger small d-none">Invalid French IBAN</div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="save-listing-info">
+                                <label class="form-check-label small">Save to profile</label>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 py-2">Publish (2€ fee)</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="app.js"></script>
+</body>
+</html>
